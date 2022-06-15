@@ -1,3 +1,4 @@
+using ToDoListProject.Context;
 using ToDoListProject.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<TarefasList>();
+builder.Services.AddSingleton<TarefaDatabase>();
 
 var app = builder.Build();
 

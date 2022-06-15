@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using ToDoListProject.Context;
 using ToDoListProject.Models;
 
 namespace ToDoListProject.Controllers
@@ -9,18 +10,18 @@ namespace ToDoListProject.Controllers
     [ApiController]
     public class TarefasController : ControllerBase
     {
-        private readonly List<Tarefa> tarefas;
+        private readonly TarefaDatabase tarefaDb;
 
-        public TarefasController(TarefasList tarefasList)
+        public TarefasController(TarefaDatabase tarefaDb)
         {
-            tarefas = tarefasList.tarefas;
+            this.tarefaDb = tarefaDb;
         }
 
         //Obter a lista de todas as tarefas
         [HttpGet]
         public IActionResult GetTarefas()
         {
-            return Ok(tarefas);
+            return Ok(tarefaDb.GetTarefas());
         }
 
         //Criar ou atualizar tarefas. Id é usado como chave
@@ -28,32 +29,7 @@ namespace ToDoListProject.Controllers
         [Route("EnviarTarefa")]
         public IActionResult EnviarTarefa(JObject objTarefa)
         {
-            var tarefa = new Tarefa(objTarefa);
-            Tarefa tarefaList = null;
-            if (tarefas != null)
-            {
-                tarefaList = tarefas.Find(t => t.Id == tarefa.Id);
-            }
-            
-            if (tarefaList != null)
-            {
-                //Atualizar
-                foreach (var t in tarefas)
-                {
-                    if (t.Id == tarefa.Id)
-                    {
-                        t.Descricao = tarefa.Descricao;
-                        t.Feito = tarefa.Feito;
-                        return Ok();
-                    }
-                }
-            }
-            else
-            {
-                //criar nova
-                tarefas.Add(tarefa);
-            }
-
+            tarefaDb.InsereAtualizaTarefa(objTarefa);
             return Ok();
         }
 
@@ -61,16 +37,14 @@ namespace ToDoListProject.Controllers
         [HttpDelete("{id}")]
         public IActionResult ApagarTarefa(int id)
         {
-            var tarefaFind = tarefas.Find(t => t.Id == id);
-            tarefas.Remove(tarefaFind);
+            tarefaDb.ApagarTarefa(id);
             return Ok();
         }
 
         [HttpGet("{id}")]
         public IActionResult BuscarTarefaId(int id)
         {
-            var tarefaFind = tarefas.Find(t => t.Id == id);
-            return Ok(tarefaFind);
+            return Ok(tarefaDb.BuscarTarefa(id));
         }
     }
 }
